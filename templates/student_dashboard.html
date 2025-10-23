@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Student Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);
+            color: #333;
+            line-height: 1.6;
+            font-size: 16px;
+        }
+
+        h2 {
+            color: #0056b3;
+            border-bottom: 3px solid #007bff;
+            padding-bottom: 12px;
+            margin-bottom: 25px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 1.8rem;
+        }
+
+        .container {
+            display: flex;
+            min-height: 90vh;
+            max-width: 1300px;
+            margin: 40px auto;
+            border-radius: 15px;
+            overflow: hidden;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%);
+            color: #ecf0f1;
+            padding: 30px 0;
+            flex-shrink: 0;
+            box-shadow: 4px 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Adjusted H3 style for multi-line college name */
+        .sidebar h3 {
+            text-align: center;
+            /* margin-bottom: 50px; <-- Adjusted below */
+            font-size: 1.4em; /* Smaller font to fit the long name */
+            font-weight: 700;
+            color: #fff;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
+            line-height: 1.2;
+            padding: 0 10px 10px 10px; /* Padding for the name */
+            margin-left: 0;
+            margin-right: 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        /* NEW: Student Role Title */
+        .sidebar h4 {
+            text-align: center;
+            color: #ffc107;
+            font-size: 1.1em;
+            font-weight: 600;
+            text-transform: uppercase;
+            margin-top: 10px;
+            margin-bottom: 40px; /* Space before links start */
+        }
+
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            padding: 18px 30px;
+            text-decoration: none;
+            color: #c0c9d7;
+            font-size: 1.05rem;
+            font-weight: 500;
+            transition: background-color 0.3s, color 0.3s, transform 0.1s;
+            cursor: pointer;
+            border-left: 5px solid transparent;
+        }
+
+        .sidebar a.active-link,
+        .sidebar a:hover,
+        .sidebar a:focus {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            border-left: 5px solid #ffc107;
+            transform: translateX(5px);
+            font-weight: 700;
+        }
+
+        .sidebar a[href*="logout"] {
+            margin-top: 50px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #ff8a80;
+        }
+
+        .sidebar a[href*="logout"]:hover {
+            background-color: #dc3545;
+            color: #fff;
+            border-left-color: #dc3545;
+        }
+
+        .content {
+            flex-grow: 1;
+            padding: 50px;
+            background-color: #ffffff;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .section {
+            display: none;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            margin-top: 25px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        table th, table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        table th {
+            color: #fff;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.95em;
+            background: linear-gradient(90deg, #007bff 0%, #0056b3 100%);
+        }
+
+        table tr:nth-child(even) {
+            background-color: #f7f9fc;
+        }
+
+        table tr:hover {
+            background-color: #eaf3ff;
+            transform: scale(1.005);
+            transition: background-color 0.3s, transform 0.2s;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="sidebar">
+            <h3>KUMARAGURU COLLEGE OF TECHNOLOGY</h3>
+            <h4>STUDENT PORTAL</h4>
+            <a onclick="showSection('details')" class="active-link">Student Details</a>
+            <a onclick="showSection('courses')">Courses</a>
+            <a onclick="showSection('attendance')">Attendance</a>
+            <a onclick="showSection('exams')">Exams</a>
+            <a onclick="showSection('results')">Results</a>
+            <a href="{{ url_for('logout') }}">Logout</a>
+        </div>
+
+        <div class="content">
+            <section id="details" class="section active">
+                <h2>Student Details</h2>
+                <table>
+                    <tr><th>ID</th><td>{{ student.student_id }}</td></tr>
+                    <tr><th>Name</th><td>{{ student.first_name }} {{ student.last_name }}</td></tr>
+                    <tr><th>DOB</th><td>{{ student.dob }}</td></tr>
+                    <tr><th>Email</th><td>{{ student.email }}</td></tr>
+                    <tr><th>Phone</th><td>{{ student.phone }}</td></tr>
+                    <tr><th>Department</th><td>{{ student.department_name }}</td></tr>
+                </table>
+            </section>
+
+            <section id="courses" class="section">
+                <h2>Courses</h2>
+                <table>
+                    <tr><th>Course Name</th><th>Faculty</th></tr>
+                    {% for c in courses %}
+                    <tr><td>{{ c.course_name }}</td><td>{{ c.faculty_first }} {{ c.faculty_last }}</td></tr>
+                    {% endfor %}
+                </table>
+            </section>
+
+            <section id="attendance" class="section">
+                <h2>Attendance</h2>
+                <table>
+                    <tr><th>Course</th><th>Date</th><th>Status</th></tr>
+                    {% for a in attendance %}
+                    <tr>
+                        <td>{{ a.course_name }}</td>
+                        <td>{{ a.date or 'N/A' }}</td>
+                        <td>{{ a.status or 'Not Marked' }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </section>
+
+            <section id="exams" class="section">
+                <h2>Exams</h2>
+                <table>
+                    <tr><th>Course</th><th>Date</th></tr>
+                    {% for e in exams %}
+                    <tr>
+                        <td>{{ e.course_name }}</td>
+                        <td>{{ e.exam_date or 'Not Scheduled' }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </section>
+
+            <section id="results" class="section">
+                <h2>Results</h2>
+                <table>
+                    <tr><th>Course</th><th>Marks</th><th>Grade</th></tr>
+                    {% for r in results %}
+                    <tr>
+                        <td>{{ r.course_name }}</td>
+                        <td>{{ r.marks or 'N/A' }}</td>
+                        <td>{{ r.grade or 'Not Graded' }}</td>
+                    </tr>
+                    {% endfor %}
+                </table>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        function showSection(sectionId) {
+            const sections = document.querySelectorAll('.section');
+            const links = document.querySelectorAll('.sidebar a');
+
+            sections.forEach(sec => sec.classList.remove('active'));
+            links.forEach(link => link.classList.remove('active-link'));
+            
+            document.getElementById(sectionId).classList.add('active');
+            // Find the link that corresponds to the section and set it active
+            document.querySelector(`.sidebar a[onclick*="${sectionId}"]`).classList.add('active-link');
+        }
+
+        // Set the initial active link when the page loads
+        document.addEventListener('DOMContentLoaded', () => {
+             // Ensure 'details' link is active on load
+            document.querySelector('.sidebar a[onclick*="details"]').classList.add('active-link');
+        });
+    </script>
+</body>
+</html>

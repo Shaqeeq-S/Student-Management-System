@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <style>
+        /*
+ * Google Fonts Import: Poppins remains, great for readability.
+ */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700;800&display=swap');
+
+/* ------------------- CORE DESIGN SYSTEM ------------------- */
+
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    /* Use the light background color as the base for the neumorphic effect */
+    background-color: #e0eafc;
+    /* Subtle geometric pattern for depth, using shades close to the background */
+    background-image: repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.2) 0px, rgba(255, 255, 255, 0.2) 2px, transparent 2px, transparent 4px);
+    color: #333;
+    line-height: 1.6;
+    font-size: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    overflow: hidden;
+    position: relative; /* Context for shimmer */
+}
+
+/* --- Main Container Layout (The Neumorphic Login Card) --- */
+.container {
+    width: 100%;
+    max-width: 460px; /* Max width for a strong presence */
+    padding: 50px 50px;
+    background-color: #e0eafc;
+    border-radius: 25px;
+    text-align: center;
+    position: relative;
+    z-index: 10;
+    /* The core Neumorphism effect */
+    box-shadow:
+        15px 15px 30px #c6d0e3, /* Darker, bottom-right shadow */
+        -15px -15px 30px #fcffff; /* Lighter, top-left shadow (highlight) */
+    transition: all 0.5s ease;
+}
+
+/* **NEW: Container Shimmer Effect** */
+/* Creates a light stripe that passes over the container for a premium feel */
+.container::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(to right, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.2) 50%, rgba(255, 255, 255, 0) 100%);
+    z-index: 11;
+    border-radius: 25px;
+    pointer-events: none; /* Allows clicks to pass through */
+    animation: shimmer 5s infinite ease-in-out;
+}
+
+@keyframes shimmer {
+    0% { left: -100%; }
+    50% { left: 150%; } /* Pass the light stripe completely over */
+    100% { left: -100%; }
+}
+
+/* ------------------- COLLEGE NAME AND LOGO TEXT STYLING ------------------- */
+
+.college-name {
+    color: #1e3c72; /* Primary Dark Blue */
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-size: 1.5rem;
+    line-height: 1.2;
+    margin-bottom: 5px;
+}
+
+.system-title {
+    color: #007bff; /* Secondary Blue */
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    font-size: 0.9rem;
+    margin-bottom: 40px;
+    padding-bottom: 10px;
+    border-bottom: 4px solid #ffc107; /* Vibrant Gold Separator */
+    display: inline-block;
+}
+
+/* Original H2 updated to serve as section title */
+h2 {
+    color: #1e3c72;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2.5px;
+    font-size: 2.4rem;
+    margin-bottom: 35px;
+    /* REMOVED border-bottom to let system-title handle the separator */
+    padding-bottom: 0; 
+    display: none; /* Hide the generic 'Login' H2 */
+}
+
+/* ------------------- FORM STYLING ------------------- */
+
+label {
+    display: block;
+    margin-top: 25px;
+    margin-bottom: 8px;
+    font-weight: 700;
+    color: #495057;
+    text-align: left;
+    font-size: 1.05rem; /* Slightly larger labels */
+    letter-spacing: 0.5px;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    padding: 16px 20px;
+    border: none;
+    border-radius: 15px;
+    box-sizing: border-box;
+    font-size: 1.05em;
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    transition: all 0.3s ease;
+    background-color: #e0eafc;
+    /* Initial 'pressed' or 'inset' neumorphism for inputs */
+    box-shadow:
+        inset 4px 4px 8px #c6d0e3,
+        inset -4px -4px 8px #fcffff;
+}
+
+/* Enhanced Focus State */
+input:focus {
+    outline: none;
+    /* Soften the inner shadows on focus */
+    box-shadow:
+        inset 1px 1px 3px #c6d0e3,
+        inset -1px -1px 3px #fcffff;
+    /* Add a subtle primary color ring */
+    border: 2px solid #007bff;
+    padding: 14px 18px;
+}
+
+/* Submit Button (Primary Accent) */
+input[type="submit"] {
+    width: 100%;
+    margin-top: 50px;
+    padding: 16px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    box-shadow: 8px 8px 16px #c6d0e3,
+                -8px -8px 16px #fcffff;
+    transition: all 0.3s ease;
+}
+
+/* Hover/Active states for Neumorphism effect */
+input[type="submit"]:hover {
+    box-shadow: 4px 4px 8px #c6d0e3,
+                -4px -4px 8px #fcffff;
+    transform: translateY(-2px);
+    background-color: #0069d9;
+}
+
+input[type="submit"]:active {
+    box-shadow: inset 4px 4px 8px #c6d0e3,
+                inset -4px -4px 8px #fcffff;
+    transform: translateY(0);
+    background-color: #0056b3;
+}
+
+/* Flash message styling */
+.flash {
+    margin-top: 20px;
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 600;
+    color: #fff;
+    background-color: #28a745;
+    text-align: center;
+    box-shadow: 4px 4px 8px #c6d0e3;
+    transition: all 0.3s ease;
+}
+
+/* Flash Danger/Error */
+.flash.danger {
+    background-color: #dc3545;
+}
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <div class="college-name">KUMARAGURU COLLEGE OF TECHNOLOGY</div>
+        <div class="system-title">FACULTY & STUDENT PORTAL</div>
+        <h2>Login</h2> <form method="POST">
+            <label>Username</label>
+            <input type="text" name="username" required placeholder="Enter your username">
+
+            <label>Password</label>
+            <input type="password" name="password" required placeholder="Enter your password">
+
+            <input type="submit" value="Login">
+        </form>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash {% if category %}{{ category }}{% endif %}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+    </div>
+</body>
+</html>
