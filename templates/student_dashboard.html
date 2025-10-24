@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>Student Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
 
@@ -171,6 +172,27 @@
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
         }
 
+        /* 2. NEW CSS FOR CHART CONTAINER */
+        .chart-container {
+            width: 100%;
+            max-width: 600px;
+            height: 300px; /* Set a height for the chart */
+            margin: 20px auto 40px auto; /* Center the chart and add margin */
+            padding: 20px;
+            background-color: #f0f4f8;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+        .chart-container h4 {
+            color: #1e3c72;
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #2a5298;
+            padding-bottom: 8px;
+            text-align: center;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -211,10 +233,16 @@
 
             <section id="attendance" class="section">
                 <h2>Attendance</h2>
+                
+                <div class="chart-container">
+                    <h4>Attendance Percentage by Course</h4>
+                    <canvas id="course-attendance-chart" aria-label="Course Attendance Chart" role="img"></canvas>
+                </div>
+                
                 <table>
                     <tr><th>Course</th><th>Date</th><th>Status</th></tr>
                     {% for a in attendance %}
-                    <tr>
+                    <tr class="{% if a.status == 'Absent' %}table-danger{% endif %}">
                         <td>{{ a.course_name }}</td>
                         <td>{{ a.date or 'N/A' }}</td>
                         <td>{{ a.status or 'Not Marked' }}</td>
@@ -269,6 +297,73 @@
         document.addEventListener('DOMContentLoaded', () => {
              // Ensure 'details' link is active on load
             document.querySelector('.sidebar a[onclick*="details"]').classList.add('active-link');
+            
+            // 4. CHART.JS INITIALIZATION FOR ATTENDANCE
+            const coursesData = [
+                // This data block relies on your Flask view populating 'courses' with a percentage.
+                {% for c in courses %}
+                {
+                    name: '{{ c.course_name }}',
+                    // IMPORTANT: The Python logic must set this key!
+                    percentage: {{ c.attendance_percentage | default(0) }} 
+                },
+                {% endfor %}
+            ];
+
+            const ctx = document.getElementById('course-attendance-chart');
+            
+            if (ctx && coursesData.length > 0) {
+                new Chart(ctx, {
+                    type: 'doughnut', // Doughnut chart for simple summary
+                    data: {
+                        labels: coursesData.map(c => c.name),
+                        datasets: [{
+                            label: 'Attendance Percentage',
+                            data: coursesData.map(c => c.percentage),
+                            backgroundColor: coursesData.map(c => {
+                                // Color-code based on performance
+                                if (c.percentage < 75) return '#dc3545'; // Red (Critical)
+                                if (c.percentage < 85) return '#ffc107'; // Yellow (Warning)
+                                return '#28a745'; // Green (Good)
+                            }),
+                            borderColor: '#ffffff',
+                            borderWidth: 2,
+                            hoverOffset: 10
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right', // Place legend next to the chart
+                                labels: {
+                                    font: {
+                                        family: 'Poppins'
+                                    }
+                                }
+                            },
+                            title: {
+                                display: false,
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        let label = context.label || '';
+                                        if (label) {
+                                            label += ': ';
+                                        }
+                                        if (context.parsed !== null) {
+                                            label += context.parsed + '%';
+                                        }
+                                        return label;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
         });
     </script>
 </body>

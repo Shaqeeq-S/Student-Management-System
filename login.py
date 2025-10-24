@@ -160,7 +160,7 @@ def admin_dashboard():
                 flash(f"Course ID {course_id} faculty assignment updated successfully!", "success")
 
             else:
-                 flash("Invalid form submission.", "danger")
+                flash("Invalid form submission.", "danger")
 
         except mysql.connector.Error as err:
             db.rollback()
@@ -204,10 +204,10 @@ def admin_dashboard():
     cursor.close()
 
     return render_template('admin_dashboard.html', 
-                           students=students, 
-                           faculty=faculty, 
-                           courses=courses,
-                           departments=departments)
+                            students=students, 
+                            faculty=faculty, 
+                            courses=courses,
+                            departments=departments)
 
 # ==========================
 # DELETE ROUTES (Unchanged)
@@ -350,13 +350,42 @@ def student_dashboard():
     """, (student_id,))
     student = cursor.fetchone()
 
-    # Fetching courses
+    # Fetching courses and enrollment IDs for attendance calculation
     cursor.execute("""
-        SELECT c.course_name, f.first_name AS faculty_first, f.last_name AS faculty_last
-        FROM Enrollment e JOIN Courses c ON e.course_id = c.course_id 
-        LEFT JOIN Faculty f ON c.faculty_id = f.faculty_id WHERE e.student_id = %s
+        SELECT e.enrollment_id, c.course_name, c.course_id, 
+               COALESCE(f.first_name, 'N/A') AS faculty_first, 
+               COALESCE(f.last_name, 'N/A') AS faculty_last
+        FROM Enrollment e 
+        JOIN Courses c ON e.course_id = c.course_id 
+        LEFT JOIN Faculty f ON c.faculty_id = f.faculty_id 
+        WHERE e.student_id = %s
     """, (student_id,))
     courses = cursor.fetchall()
+
+    # --- ATTENDANCE CHART LOGIC: Calculate and attach percentage to each course ---
+    for course in courses:
+        # Get attendance counts for this specific enrollment
+        cursor.execute("""
+            SELECT 
+                SUM(CASE WHEN status = 'Present' THEN 1 ELSE 0 END) AS present_count,
+                COUNT(attendance_id) AS total_count
+            FROM Attendance 
+            WHERE enrollment_id = %s
+        """, (course['enrollment_id'],))
+        
+        attendance_counts = cursor.fetchone()
+        
+        present_count = attendance_counts['present_count'] or 0
+        total_count = attendance_counts['total_count'] or 0
+        
+        if total_count > 0:
+            # Calculate percentage and round to one decimal place
+            percentage = round((present_count / total_count) * 100, 1)
+        else:
+            percentage = 0
+            
+        # Attach the calculated percentage to the course dictionary
+        course['attendance_percentage'] = percentage
 
     # Fetching exams
     cursor.execute("""
@@ -368,7 +397,9 @@ def student_dashboard():
 
     # Fetching attendance
     cursor.execute("""
-        SELECT c.course_name, a.date, a.status, f.first_name AS faculty_first, f.last_name AS faculty_last
+        SELECT c.course_name, a.date, a.status, 
+               COALESCE(f.first_name, 'N/A') AS faculty_first, 
+               COALESCE(f.last_name, 'N/A') AS faculty_last
         FROM Enrollment e 
         JOIN Courses c ON e.course_id = c.course_id 
         LEFT JOIN Attendance a ON a.enrollment_id = e.enrollment_id
@@ -514,9 +545,9 @@ def faculty_dashboard(faculty_id):
 
     cursor.close()
     return render_template('faculty_dashboard.html', 
-                           faculty=faculty, 
-                           course_data=course_data, 
-                           current_date=date.today().isoformat())
+                            faculty=faculty, 
+                            course_data=course_data, 
+                            current_date=date.today().isoformat())
 
 
 @app.route('/logout')
